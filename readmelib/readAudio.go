@@ -1,11 +1,11 @@
 package readmelib
 
 import (
+	"context"
+	b64 "encoding/base64"
 	"fmt"
 	"io/ioutil"
 	"log"
-
-	"context"
 
 	texttospeech "cloud.google.com/go/texttospeech/apiv1"
 	texttospeechpb "google.golang.org/genproto/googleapis/cloud/texttospeech/v1"
@@ -13,7 +13,7 @@ import (
 
 // SynthesizeAudio receives a string and returns an mp3 audio file
 // func SynthesizeAudio(w io.Writer, text string, outputFile string) error {
-func SynthesizeAudio(text string) {
+func SynthesizeAudio(text string) string {
 	// Instantiates a client.
 	ctx := context.Background()
 
@@ -53,4 +53,6 @@ func SynthesizeAudio(text string) {
 		log.Fatal(err)
 	}
 	fmt.Printf("Audio content written to file: %v\n", filename)
+	sEnc := b64.StdEncoding.EncodeToString([]byte(resp.AudioContent))
+	return sEnc
 }

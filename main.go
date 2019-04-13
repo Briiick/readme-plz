@@ -15,6 +15,7 @@ import (
 type successResponse struct {
 	Text    string
 	Message string
+	Audio   string
 }
 
 // Declare the failure response type
@@ -37,14 +38,18 @@ func ReadImageHandler(w http.ResponseWriter, r *http.Request) {
 	text := readmelib.DetectDocumentText("result")
 
 	if text != "" {
-		readmelib.SynthesizeAudio(text)
+		audio := readmelib.SynthesizeAudio(text)
 
 		response := &successResponse{
 			Text:    text,
+			Audio:   audio,
 			Message: "SYNTHESIS_SUCCESS"}
 
 		json, _ := json.Marshal(response)
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Headers", "*")
 		w.Header().Set("Content-Type", "application/json")
+
 		w.WriteHeader(http.StatusOK)
 		w.Write(json)
 	} else {
@@ -52,8 +57,11 @@ func ReadImageHandler(w http.ResponseWriter, r *http.Request) {
 			Message: "SYNTHESIS_FAILURE"}
 
 		json, _ := json.Marshal(response)
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Headers", "*")
 		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusNotAcceptable)
+
+		w.WriteHeader(http.StatusOK)
 		w.Write(json)
 	}
 }
@@ -69,6 +77,7 @@ func UploadHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		panic(err)
 	}
-
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Headers", "*")
 	w.Write([]byte(fmt.Sprintf("%d bytes are recieved.\n", n)))
 }
