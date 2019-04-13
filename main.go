@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/gorilla/mux"
 	"github.com/papapalapa/readme-plz/readmelib"
@@ -9,6 +10,17 @@ import (
 	"net/http"
 	"os"
 )
+
+// Declare the success response type
+type successResponse struct {
+	Text    string
+	Message string
+}
+
+// Declare the failure response type
+type failureResponse struct {
+	Message string
+}
 
 func main() {
 	r := mux.NewRouter()
@@ -23,7 +35,27 @@ func main() {
 // ReadImageHandler receives binary image data as input and generates an mp3 file
 func ReadImageHandler(w http.ResponseWriter, r *http.Request) {
 	text := readmelib.DetectDocumentText("result")
-	readmelib.SynthesizeAudio(text)
+
+	if text != "" {
+		readmelib.SynthesizeAudio(text)
+
+		response := &successResponse{
+			Text:    text,
+			Message: "SYNTHESIS_SUCCESS"}
+
+		json, _ := json.Marshal(response)
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		w.Write(json)
+	} else {
+		response := &failureResponse{
+			Message: "SYNTHESIS_FAILURE"}
+
+		json, _ := json.Marshal(response)
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusNotAcceptable)
+		w.Write(json)
+	}
 }
 
 // UploadHandler receives an image file and returns the binary data of the image
