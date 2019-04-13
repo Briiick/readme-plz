@@ -32,7 +32,7 @@ func SynthesizeAudio(text string) {
 		// Build the voice request, select the language code ("en-US") and the SSML
 		// voice gender ("neutral").
 		Voice: &texttospeechpb.VoiceSelectionParams{
-			LanguageCode: "en-US-Wavenet-B",
+			LanguageCode: "en-US-Wavenet-A",
 			SsmlGender:   texttospeechpb.SsmlVoiceGender_NEUTRAL,
 		},
 		// Select the type of audio file you want returned.

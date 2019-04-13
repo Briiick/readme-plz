@@ -1,53 +1,42 @@
 package main
 
 import (
-	"flag"
 	"fmt"
+	"github.com/gorilla/mux"
 	"github.com/papapalapa/readme-plz/readmelib"
 	"io"
+	"log"
+	"net/http"
 	"os"
-	"path/filepath"
-	"strings"
 )
 
 func main() {
-	flag.Usage = func() {
-		fmt.Fprintf(os.Stderr, "Usage: %s <path-to-image>\n", filepath.Base(os.Args[0]))
-		fmt.Fprintf(os.Stderr, "Pass either a path to a local file, or a URI.\n")
-		fmt.Fprintf(os.Stderr, "Prefix a path with gs:// to refer to a file on GCS.\n")
-	}
-	flag.Parse()
+	r := mux.NewRouter()
+	// Routes consist of a path and a handler function.
+	r.HandleFunc("/", ReadImageHandler)
+	r.HandleFunc("/upload", UploadHandler)
 
-	args := flag.Args()
-	if len(args) == 0 {
-		flag.Usage()
-		os.Exit(1)
+	// Bind to a port and pass our router in
+	log.Fatal(http.ListenAndServe(":8000", r))
+}
+
+// ReadImageHandler receives binary image data as input and generates an mp3 file
+func ReadImageHandler(w http.ResponseWriter, r *http.Request) {
+	text := readmelib.DetectDocumentText("result")
+	readmelib.SynthesizeAudio(text)
+}
+
+// UploadHandler receives an image file and returns the binary data of the image
+func UploadHandler(w http.ResponseWriter, r *http.Request) {
+	file, err := os.Create("./result")
+	if err != nil {
+		panic(err)
 	}
 
-	path := flag.Arg(0)
-	match := flag.Arg(1)
-
-	samples := []struct {
-		name       string
-		local, uri func(io.Writer, string) error
-	}{
-		{"detectDocumentText", readmelib.DetectDocumentText, readmelib.DetectDocumentTextURI},
+	n, err := io.Copy(file, r.Body)
+	if err != nil {
+		panic(err)
 	}
 
-	for _, sample := range samples {
-		if !strings.Contains(sample.name, match) {
-			continue
-		}
-		fmt.Println("---", sample.name)
-		var err error
-		if strings.Contains(path, "://") {
-			err = sample.uri(os.Stdout, path)
-		} else {
-			err = sample.local(os.Stdout, path)
-		}
-		if err != nil {
-			fmt.Println("Error:", err)
-		}
-	}
-	//readmelib.SynthesizeAudio("I have a common issue with you.")
+	w.Write([]byte(fmt.Sprintf("%d bytes are recieved.\n", n)))
 }
