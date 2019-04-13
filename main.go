@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/gorilla/mux"
 	"github.com/papapalapa/readme-plz/readmelib"
 	"io"
 	"log"
@@ -24,13 +23,19 @@ type failureResponse struct {
 }
 
 func main() {
-	r := mux.NewRouter()
 	// Routes consist of a path and a handler function.
-	r.HandleFunc("/", ReadImageHandler)
-	r.HandleFunc("/upload", UploadHandler)
+	http.HandleFunc("/", ReadImageHandler)
+	http.HandleFunc("/upload", UploadHandler)
+
+	// Get environment port
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+		log.Printf("Defaulting to port %s", port)
+	}
 
 	// Bind to a port and pass our router in
-	log.Fatal(http.ListenAndServe(":8000", r))
+	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", port), nil))
 }
 
 // ReadImageHandler receives binary image data as input and generates an mp3 file
