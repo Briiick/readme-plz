@@ -1,4 +1,5 @@
 # README.plz
+Democratizing The Way To Help The Blind See
 
 ## Inspiration
 Our friends.
