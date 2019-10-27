@@ -63,3 +63,9 @@ Finally, we acknowledge that there are many solutions like this. However, becaus
   - ex. This new feature can inform the user of people's emotions, objects, etc
 - Expand the open-source community
   - ex. recruit people to work on the open-source project to allow more people to contribute to helping disabled people
+
+## Team:
+- Alexander Bricken
+- Janghoon Lee
+- Alexander Wu
+- Ba Thien Tran
